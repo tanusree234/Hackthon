@@ -1,2 +1,17 @@
 streamlit
 opencv-python
+plotly
+langchain
+langchain_community
+openai
+chromadb
+langchain-experimental
+unstructured[all-docs]
+pypdf
+pillow
+pydantic
+lxml
+pillow
+matplotlib
+chromadb
+tiktoken

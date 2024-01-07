@@ -11,19 +11,6 @@ APP_TITLE = "Smart Eye"
 APP_SUB_TITLE = "Enhancing Capabilities with GenAI and IoT Integration"
 
 # Create a directory to store the captured frames
-import streamlit as st
-import cv2
-import numpy as np
-import time
-import threading
-import os
-import pyaudio
-import wave
-
-APP_TITLE = "Your App Title"
-APP_SUB_TITLE = "Your App Subtitle"
-
-# Create a directory to store the captured frames
 frames_directory = "captured/frames"
 audio_directory = "captured/audio"
 processing_dir = os.path.join(frames_directory, "processing")
