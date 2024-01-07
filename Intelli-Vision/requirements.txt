@@ -1,0 +1,12 @@
+streamlit
+ultralytics
+pygobject
+gtts
+playsound
+pyttsx3
+pynmea2
+picamera2
+pynmea2
+google-generativeai
+google-cloud-aiplatform
+tflite-runtime
