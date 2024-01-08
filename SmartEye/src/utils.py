@@ -3,6 +3,8 @@ import os
 import uuid
 import io
 import re
+import cv2
+import shutil
 
 from langchain_core.messages import HumanMessage
 from langchain.prompts import PromptTemplate
@@ -275,3 +277,69 @@ def multi_modal_rag_chain(retriever):
     )
 
     return chain
+
+
+def split_and_move_video(input_file, video_folder, chunk_duration_sec):
+    # Create video folders if they don't exist
+    processing_folder = os.path.join(video_folder, "processing")
+    processed_folder = os.path.join(video_folder, "processed")
+
+    os.makedirs(video_folder, exist_ok=True)
+    os.makedirs(processing_folder, exist_ok=True)
+    os.makedirs(processed_folder, exist_ok=True)
+    os.makedirs(os.path.join(processing_folder, "chunks"), exist_ok=True)
+
+    # Move the original video to the processing folder
+    original_video_path = os.path.join(processing_folder, input_file)
+    shutil.move(input_file, original_video_path)
+
+    # Open the video file
+    video_capture = cv2.VideoCapture(original_video_path)
+
+    # Get video properties
+    fps = video_capture.get(cv2.CAP_PROP_FPS)
+    frame_width = int(video_capture.get(cv2.CAP_PROP_FRAME_WIDTH))
+    frame_height = int(video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    # Calculate chunk size in frames
+    chunk_size_frames = int(fps * chunk_duration_sec)
+
+    # Loop through the video and save/move chunks
+    chunk_count = 1
+    while True:
+        ret, frame = video_capture.read()
+        if not ret:
+            break
+
+        # Check if it's time to start a new chunk
+        if video_capture.get(cv2.CAP_PROP_POS_FRAMES) % chunk_size_frames == 0:
+            chunk_output_folder = os.path.join(processing_folder, "chunks")
+            output_file = os.path.join(
+                chunk_output_folder,
+                f"{input_file.split('/')[-1].split('.')[0]}_chunk_{chunk_count}.mp4",
+            )
+            out = cv2.VideoWriter(
+                output_file,
+                cv2.VideoWriter_fourcc(*"mp4v"),
+                fps,
+                (frame_width, frame_height),
+            )
+            # For newer versions of OpenCV, you can also use cv2.VideoWriter_fourcc(*'X264') as the codec
+
+            chunk_count += 1
+
+        out.write(frame)
+
+    # Release resources
+    video_capture.release()
+    if out:
+        out.release()
+
+    # Move the original video and chunks to the processed folder
+    shutil.move(
+        original_video_path, os.path.join(processed_folder, "original_video.mp4")
+    )
+    shutil.move(
+        os.path.join(processing_folder, "chunks"),
+        os.path.join(processed_folder, "chunks"),
+    )

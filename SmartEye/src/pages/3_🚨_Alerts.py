@@ -12,7 +12,7 @@ def create_current_database():
     c.execute(
         """CREATE TABLE IF NOT EXISTS current_alerts
                  (id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                 name TEXT, description TEXT, active BOOLEAN DEFAULT 1, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)"""
+                 Name TEXT, Description TEXT, Type TEXT, Active BOOLEAN DEFAULT 1, Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)"""
     )
     conn.commit()
     conn.close()
@@ -25,20 +25,20 @@ def create_history_database():
     c.execute(
         """CREATE TABLE IF NOT EXISTS alert_history
                  (id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                 name TEXT, description TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)"""
+                 Name TEXT, Description TEXT, Type TEXT, Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)"""
     )
     conn.commit()
     conn.close()
 
 
 # Function to add a new alert to the current alerts database
-def add_current_alert(alert_name, alert_description):
+def add_current_alert(alert_name, alert_description, alert_type="Default"):
     if alert_name and alert_description:
         conn = sqlite3.connect("current_alerts.db")
         c = conn.cursor()
         c.execute(
-            "INSERT INTO current_alerts (name, description) VALUES (?, ?)",
-            (alert_name, alert_description),
+            "INSERT INTO current_alerts (Name, Description, Type) VALUES (?, ?, ?)",
+            (alert_name, alert_description, alert_type),
         )
         conn.commit()
         conn.close()
@@ -56,13 +56,13 @@ def move_to_history(alert_id):
 
     # Retrieve alert details from current alerts database
     c_current.execute(
-        "SELECT name, description FROM current_alerts WHERE id = ?", (alert_id,)
+        "SELECT Name, Description FROM current_alerts WHERE id = ?", (alert_id,)
     )
     alert_details = c_current.fetchone()
 
     # Insert the alert details into alert history database
     c_history.execute(
-        "INSERT INTO alert_history (name, description) VALUES (?, ?)", alert_details
+        "INSERT INTO alert_history (Name, Description) VALUES (?, ?)", alert_details
     )
     conn_history.commit()
 
@@ -77,7 +77,7 @@ def move_to_history(alert_id):
 # Function to get all current alerts from the current alerts database as a DataFrame
 def get_current_alerts():
     conn = sqlite3.connect("current_alerts.db")
-    query = "SELECT * FROM current_alerts ORDER BY timestamp DESC"
+    query = "SELECT * FROM current_alerts ORDER BY Timestamp DESC"
     df = pd.read_sql_query(query, conn)
     conn.close()
     return df
@@ -86,7 +86,7 @@ def get_current_alerts():
 # Function to get all alert history from the alert history database as a DataFrame
 def get_alert_history():
     conn = sqlite3.connect("alert_history.db")
-    query = "SELECT * FROM alert_history ORDER BY timestamp DESC"
+    query = "SELECT * FROM alert_history ORDER BY Timestamp DESC"
     df = pd.read_sql_query(query, conn)
     conn.close()
     return df
@@ -97,7 +97,7 @@ def deactivate_selected_alerts(alert_ids):
     conn = sqlite3.connect("current_alerts.db")
     c = conn.cursor()
     for alert_id in alert_ids:
-        c.execute("UPDATE current_alerts SET active = 0 WHERE id = ?", (alert_id,))
+        c.execute("UPDATE current_alerts SET Active = 0 WHERE id = ?", (alert_id,))
     conn.commit()
     conn.close()
 
@@ -107,28 +107,28 @@ def reactivate_selected_alerts(alert_ids):
     conn = sqlite3.connect("current_alerts.db")
     c = conn.cursor()
     for alert_id in alert_ids:
-        c.execute("UPDATE current_alerts SET active = 1 WHERE id = ?", (alert_id,))
+        c.execute("UPDATE current_alerts SET Active = 1 WHERE id = ?", (alert_id,))
     conn.commit()
     conn.close()
 
 
 # Function to plot an interactive pie chart of active alerts using Plotly
 def plot_pie_chart(df):
-    if not df.empty and "name" in df.columns:
-        active_df = df[df["active"] == 1]
+    if not df.empty and "Name" in df.columns:
+        active_df = df[df["Active"] == 1]
 
         fig = px.pie(
             active_df,
-            names="name",
+            names="Name",
             title="Active Alerts Distribution",
-            labels={"name": "Alert Name"},
+            labels={"Name": "Alert Name"},
             hole=0.3,
         )
 
         st.plotly_chart(fig)
 
     elif not df.empty:
-        st.warning("No 'name' column found in the DataFrame.")
+        st.warning("No 'Name' column found in the DataFrame.")
     else:
         st.warning("No data available for previous alerts.")
 
@@ -157,11 +157,11 @@ def main():
                 alert_description = st.text_area(
                     "Alert Description", key="alert_description"
                 )
-
+                alert_type = st.selectbox("Alert Type", ["Default", "Custom"])
                 if st.form_submit_button(
                     label="Add Alert",
                     on_click=add_current_alert,
-                    args=(alert_name, alert_description),
+                    args=(alert_name, alert_description, alert_type),
                 ):
                     # Add the alert to the database
                     st.success("Alert added successfully!")
@@ -173,7 +173,7 @@ def main():
                     # Employ st.multiselect outside the form to work around Streamlit's limitation
                     selected_alert_ids = st.multiselect(
                         "Select alerts to deactivate",
-                        current_alerts_df[current_alerts_df["active"] == 1]["id"],
+                        current_alerts_df[current_alerts_df["Active"] == 1]["id"],
                         key="deactive_alert",
                     )
 
@@ -186,14 +186,14 @@ def main():
             with st.expander("Reactivate Alerts"):
                 with st.form("reac_form", clear_on_submit=True):
                     deactivated_alerts = current_alerts_df[
-                        current_alerts_df["active"] == 0
+                        current_alerts_df["Active"] == 0
                     ]
 
                     if not deactivated_alerts.empty:
                         # Display multiselect if there are deactivated alerts
                         selected_alert_ids = st.multiselect(
                             "Select alerts to reactivate",
-                            current_alerts_df[current_alerts_df["active"] == 0]["id"],
+                            current_alerts_df[current_alerts_df["Active"] == 0]["id"],
                             key="reactive_alert",
                         )
 
