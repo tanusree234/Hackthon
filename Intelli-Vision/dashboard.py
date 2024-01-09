@@ -34,6 +34,7 @@ def get_closest_landmark(latitude, longitude, api_key, landmark_type):
 # Function to create a Streamlit dashboard
 # Function to create a Streamlit dashboard
 def main():
+    st.set_page_config(layout="wide")
     st.title("Intelli-Vision Dashboard")
     st.sidebar.header("Landmark Detection")
 
