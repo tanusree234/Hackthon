@@ -21,7 +21,7 @@ if "google.colab" in sys.modules:
     import vertexai
 
     vertexai.init(project=PROJECT_ID, location=LOCATION)
-    
+
 multimodal_model = GenerativeModel("gemini-pro-vision")
 
 file_path = "github-repo/img/gemini/multimodality_usecases_overview/pixel8.mp4"
