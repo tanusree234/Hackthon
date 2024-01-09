@@ -12,7 +12,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Access the API key using the environment variable
-api_key = os.getenv("MAP_API_KEY")
+api_key="AIzaSyCyyYEMD9w13RkHRfylHEjbzliCDfxoWuw"
+#api_key = os.getenv("MAP_API_KEY")
+
 
 # Function to get the closest landmark
 def get_closest_landmark(latitude, longitude, api_key, landmark_type):
@@ -31,7 +33,7 @@ def get_closest_landmark(latitude, longitude, api_key, landmark_type):
     else:
         return None
 
-# Function to create a Streamlit dashboard
+
 # Function to create a Streamlit dashboard
 def main():
     st.set_page_config(layout="wide")
@@ -47,7 +49,7 @@ def main():
     # api_key = "YOUR_GOOGLE_MAPS_API_KEY"
 
     # Landmark types for dropdown
-    landmark_types = ["school", "hospital", "restaurant", "park", "airport",
+    landmark_types = ["current location", "school", "hospital", "restaurant", "park", "airport", "shop"
                       "gym", "shopping_mall", "movie_theater", "lodging", "museum"]
 
     # Dropdown for selecting landmark type
@@ -78,6 +80,7 @@ def main():
     # Display events table
     st.subheader("Events Table")
     st.table(events_df)
+
 
 if __name__ == "__main__":
     main()

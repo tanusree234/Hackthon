@@ -2,9 +2,10 @@ import json
 import geocoder
 import pyttsx3
 import requests
+import os
 
 
-def get_closest_landmark(latitude, longitude, api_key, landmark_type):
+def get_closest_landmark(latitude, longitude, landmark_type, api_key):
     # Define the base URL for the Google Places API
     base_url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
 
@@ -21,6 +22,7 @@ def get_closest_landmark(latitude, longitude, api_key, landmark_type):
 
     # Parse the response JSON
     response_json = json.loads(response.text)
+    print(str(response_json))
 
     # Get the first result from the response
     first_result = response_json["results"][0]
@@ -28,7 +30,7 @@ def get_closest_landmark(latitude, longitude, api_key, landmark_type):
     # Return the name of the first result
     return first_result["name"]
 
-
+'''
 # Geocoding of current location
 g = geocoder.ip('me')
 
@@ -38,11 +40,14 @@ loc = g.latlng
 # Replace with your actual latitude, longitude, and API key
 lat = loc[0]
 lng = loc[1]
-api_key = ""
+api_key = os.getenv("MAP_API_KEY")
+print("API Key: ", api_key)
 landmark_type = "school"
 
-landmark = get_closest_landmark(lat, lng, api_key, landmark_type)
+landmark = get_closest_landmark(lat, lng, "AIzaSyCyyYEMD9w13RkHRfylHEjbzliCDfxoWuw", landmark_type)
 print(f"The closest {landmark_type} is: {landmark}")
 engine = pyttsx3.init()
 engine.say(f"The closest {landmark_type} is: {landmark}")
 engine.runAndWait()
+
+'''
