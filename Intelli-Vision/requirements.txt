@@ -10,3 +10,5 @@ pynmea2
 google-generativeai
 google-cloud-aiplatform
 tflite-runtime
+python-dotenv
+geocoder

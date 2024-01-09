@@ -20,6 +20,7 @@ import google.generativeai as genai
 from IPython.display import display
 from IPython.display import Markdown
 
+from dotenv import load_dotenv
 from picamera2 import MappedArray, Picamera2, Preview
 from ultralytics import YOLO
 from PIL import Image
@@ -29,12 +30,14 @@ import tempfile
 import playsound
 import pyttsx3
 
+# Load environment variables from the .env file
+load_dotenv()
+
 os.environ.pop("QT_QPA_PLATFORM_PLUGIN_PATH")
 
 # 1. Configuration
-apikey = input("Provide Gemini API key: ")
 # genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-genai.configure(api_key="AIzaSyCqH3g5P8GhTAOmpitc0Q-hu9whEtvd53c")
+genai.configure(api_key=os.getenv("API_KEY"))
 generation_config = { "temperature": 0.4, "top_p": 1, "top_k": 32, "max_output_tokens": 4096 }
 
 # 2. Initialise Model
@@ -73,15 +76,31 @@ def check_internet():
         return False
 
 # Function to send images for prediction using LLM model
-def send_images_for_prediction(image):
+def send_images_for_prediction(image, distance):
     image_bytes = cv2.imencode('.jpg', image)[1].tobytes()
     
     # Convert bytes to PIL Image
     pil_image = Image.open(io.BytesIO(image_bytes))
 
+    prompt = """You are blind person assistant becoming their vision. Guide the person about objects/People which are near and if they are very close by then alert the user on the same. 
+    create a alert, if the images have hazardous, danger, overcrowded or vehicles coming toward him/her.  
+
+    Alert like Danger, Hazardous, Fire, Vehicle approaching, overcrowded or None
+
+    create a json response: 
+    {
+        "Alert" : "<comma sepearted alerts names>",
+        "Description": "Short description of the image content",
+        "Objects": "<comma separted of the objects observed>"
+    }
+
+    Example: In traffic, if a vehicle is approaching and distance is less than 50 and coming towards user, then suggest user to which side user can walk as part of description and suggest alert name accordingly in one or 2 words.
+
+    if no alerts then pass Alert value as empty string.
+    Distance captured from sensor: """ + str(distance)
     # 3. Generate Content    
     response = LLMmodel.generate_content(
-        ["You are blind person assistant becoming their vision. Guide the person about objects/People which are near and if they are very close by then alert the user on the same \n", pil_image]
+        [prompt, pil_image]
     )
     response.resolve()
 

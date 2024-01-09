@@ -38,7 +38,7 @@ loc = g.latlng
 # Replace with your actual latitude, longitude, and API key
 lat = loc[0]
 lng = loc[1]
-api_key = "AIzaSyCyyYEMD9w13RkHRfylHEjbzliCDfxoWuw"
+api_key = ""
 landmark_type = "school"
 
 landmark = get_closest_landmark(lat, lng, api_key, landmark_type)

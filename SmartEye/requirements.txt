@@ -2,7 +2,6 @@ streamlit
 opencv-python
 plotly
 langchain
-langchain_community
 openai
 chromadb
 langchain-experimental
@@ -15,3 +14,4 @@ pillow
 matplotlib
 chromadb
 tiktoken
+python-dotenv
