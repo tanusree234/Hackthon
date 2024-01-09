@@ -34,7 +34,7 @@ def move_jpg_files(source_folder, destination_folder):
         print(f"Moved: {jpg_file}")
 
 
-source_folder_path = "./frames"
+source_folder_path = r"C:\Users\tanus\Documents\Github-gl\Hackthon\Intelli-Vision\frames"
 interm_dest_folder_path = os.path.join(source_folder_path, "processing")
 final_dest_folder_path = os.path.join(source_folder_path, "processed")
 # Create output folder if it doesn't exist
